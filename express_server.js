@@ -27,15 +27,20 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let newKey = generateRandomString();
+  urlDatabase[newKey] = req.body.longURL;
+  res.redirect(`http://localhost:8080/urls/${newKey}`);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
-
 
 app.get("/", (req, res) => {
   res.send("Hello!");
