@@ -36,6 +36,15 @@ function generateRandomString() {
   return randomKey;
 }
 
+//Function to check if the email already exist
+function checkingEmail(email) {
+  for (const key in users) {
+    if(users[key].email === email)
+    return true;
+  } 
+  return false ;
+}
+
 //To read the file index.ejs
 app.get('/urls', (req, res) => {
   let templateVars = { 
@@ -66,14 +75,24 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   let newUser = generateRandomString()
   const { email, password } = req.body;
+  
+  if (email === '' || password === '') {
+    res.statusCode = 400;
+    res.send("Please, enter valid email and/or password!")
+
+  } else if (checkingEmail(email)) {
+    res.statusCode = 400;
+    res.send("Email already registered!");
+
+  } else {
   users[newUser] = {
     newUser,
     email,
     password
   };
-  res.cookie('username', email)
+  res.cookie('username', email);
   res.redirect(`http://localhost:8080/urls`);
-  
+  }
 });
 
 
