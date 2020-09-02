@@ -14,16 +14,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-//Passing username do EJS files
-/*
-let templateVars = {
-  username: req.cookies["username"],
-};
-res.render("urls_index", templateVars);
-res.render("_hearder", templateVars);
-res.render("urls_new", templateVars);
-res.render("urls_show", templateVars);
-*/
+
 
 function generateRandomString() {
   let randomKey = Math.random().toString(36).substring(6)
@@ -32,12 +23,21 @@ function generateRandomString() {
 
 
 app.get('/urls', (req, res) => {
-  let templateVars = { "urls": urlDatabase };
+  let templateVars = { 
+    "urls": urlDatabase,
+     username: req.cookies["username"]
+    };
   res.render("urls_index", templateVars);
 });
 
+
+
+
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_new", templateVars);
 });
 
 // add an edit request
@@ -50,6 +50,11 @@ app.post("/urls/:shortURL", (req, res) => {
 // add login functionality
 app.post("/login", (req, res) => { 
   res.cookie('username', req.body.username)
+  res.redirect(`http://localhost:8080/urls`)
+});
+
+app.post("/logout", (req, res) => { 
+  res.clearCookie('username');
   res.redirect(`http://localhost:8080/urls`)
 });
 
@@ -75,7 +80,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
   res.render("urls_show", templateVars);
 });
 
