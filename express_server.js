@@ -16,6 +16,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//Users object
+const users = { 
+  "123AbC": {
+    id: "123AbC", 
+    email: "ricardo@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "456DeF": {
+    id: "u456DeF", 
+    email: "barbosa@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 //Functionality to create random keys to the new urls links
 function generateRandomString() {
@@ -33,7 +46,7 @@ app.get('/urls', (req, res) => {
 });
 
 
-//ro read the file urls_new.ejs
+//to read the file urls_new.ejs
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     username: req.cookies["username"],
@@ -41,7 +54,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-//ro read the file register.ejs
+//To read the file register.ejs
 app.get("/register", (req, res) => {
   let templateVars = {
     username: req.cookies["username"],
@@ -49,11 +62,25 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
-// add an edit request (change the address of an already website and keep the previous key)
+//To add new users
+app.post("/register", (req, res) => {
+  let newUser = generateRandomString()
+  const { email, password } = req.body;
+  users[newUser] = {
+    newUser,
+    email,
+    password
+  };
+  res.cookie('username', email)
+  res.redirect(`http://localhost:8080/urls`);
+  
+});
+
+
+// To add an edit request (change the address of an already website and keep the previous key)
 app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.longURL
   res.redirect(`http://localhost:8080/urls`)
-  
 });
 
 // add login functionality
