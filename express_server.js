@@ -45,6 +45,17 @@ function checkingEmail(email) {
   return false ;
 }
 
+// Extract a password from an object with an email as an input
+function bringPassword(email) {
+  let bringKey = "";
+  for(const key in users) {
+    if (users[key].email === email) {
+      bringKey = key;
+      return users[key].password;
+    }
+  }
+};
+
 //To read the file index.ejs
 app.get('/urls', (req, res) => {
   let templateVars = { 
@@ -114,8 +125,18 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // add login functionality
 app.post("/login", (req, res) => { 
-  res.cookie('username', req.body.username)
+
+  if(checkingEmail(req.body.email) && bringPassword(req.body.email) === req.body.password ) {
+  res.cookie('username', req.body.id) //check sent cookies
   res.redirect(`http://localhost:8080/urls`)
+  } else if (!checkingEmail(req.body.email)) {
+    res.statusCode = 403;
+    res.send("Please, enter a valid email");
+  } else if (bringPassword(req.body.email) !== req.body.password) {
+    res.statusCode = 403;
+    res.send("Password does not match");
+  }
+
 });
 
 // add logout functionality (cleaning cookies)
