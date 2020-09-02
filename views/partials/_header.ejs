@@ -8,12 +8,13 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+      </div>
 
-            </div>
+      <div style="width:80%; display: flex; align-content: center;  justify-content: flex-end !important">
         <% if (!user_id) { %>
           <form class="form-inline" action="/register" method="GET">
             <div class="form-group mb-2">
-              <button type="submit" class="btn btn-outline-dark" style="display: flex">Register</button>
+              <button type="submit" class="btn btn-outline-dark" style="display: flex">Register</button>&nbsp;&nbsp;&nbsp;
             </div>
           </form>
 
@@ -26,13 +27,13 @@
         <% } else { %>
           <form class="form-inline" action="/logout" method="POST">
             <div class="form-group mb-2">
-              <label> Logged In As: <%= email %>   </label>
+              <label> Logged In As: <%= email %>   </label>&nbsp;&nbsp;
               <button type="submit" class="btn btn-outline-dark">Logout</button>
             </div>
           </form>
 
           <% } %>
-
+      </div>    
 
 
     </div>

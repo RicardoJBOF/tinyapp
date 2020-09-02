@@ -177,11 +177,19 @@ app.post("/logout", (req, res) => {
   res.redirect(`http://localhost:8080/urls`)
 });
 
+
+
 //create a new Url
 app.post("/urls", (req, res) => {
+  let user_id = req.cookies["id"];
+  if (user_id) {
   let newKey = generateRandomString();
   urlDatabase[newKey] = req.body.longURL;
   res.redirect(`http://localhost:8080/urls/${newKey}`);
+  } else {
+    res.redirect(`http://localhost:8080/urls`)
+  }
+
 });
 
 //send you back to the urls_index after delete a Url link
