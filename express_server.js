@@ -63,6 +63,16 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+
+//to read the file login
+app.get("/login", (req, res) => {
+  let templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("login", templateVars);
+});
+
+
 //To read the file register.ejs
 app.get("/register", (req, res) => {
   let templateVars = {
