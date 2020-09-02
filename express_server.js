@@ -56,11 +56,36 @@ function bringPassword(email) {
   }
 };
 
+// Extract an email from an object with an id as an input
+function bringEmail(id) {
+  let bringKey = "";
+  for(const key in users) {
+    if (users[key].id === id) {
+      bringKey = key;
+      return users[key].email;
+    }
+  }
+};
+
+
+// Extract an id from an object with an email as an input
+function bringId(email) {
+  let bringKey = "";
+  for(const key in users) {
+    if (users[key].email === email) {
+      bringKey = key;
+      return users[key].id;
+    }
+  }
+};
+
 //To read the file index.ejs
 app.get('/urls', (req, res) => {
+  let user_id = req.cookies["id"];
   let templateVars = { 
     "urls": urlDatabase,
-     username: req.cookies["username"]
+    email: bringEmail(user_id),
+    user_id: req.cookies["id"]
     };
   res.render("urls_index", templateVars);
 });
@@ -68,8 +93,10 @@ app.get('/urls', (req, res) => {
 
 //to read the file urls_new.ejs
 app.get("/urls/new", (req, res) => {
+  let user_id = req.cookies["id"];
   let templateVars = {
-    username: req.cookies["username"],
+    email: bringEmail(user_id),
+    user_id: req.cookies["id"]
   };
   res.render("urls_new", templateVars);
 });
@@ -77,8 +104,10 @@ app.get("/urls/new", (req, res) => {
 
 //to read the file login
 app.get("/login", (req, res) => {
+  let user_id = req.cookies["id"];
   let templateVars = {
-    username: req.cookies["username"],
+    user_id: req.cookies["id"],
+    email: bringEmail(user_id)
   };
   res.render("login", templateVars);
 });
@@ -86,15 +115,17 @@ app.get("/login", (req, res) => {
 
 //To read the file register.ejs
 app.get("/register", (req, res) => {
+  let user_id = req.cookies["id"];
   let templateVars = {
-    username: req.cookies["username"],
+    user_id: req.cookies["id"],
+    email: bringEmail(user_id)
   };
   res.render("register", templateVars);
 });
 
 //To add new users
 app.post("/register", (req, res) => {
-  let newUser = generateRandomString()
+  let id = generateRandomString()
   const { email, password } = req.body;
   
   if (email === '' || password === '') {
@@ -106,12 +137,12 @@ app.post("/register", (req, res) => {
     res.send("Email already registered!");
 
   } else {
-  users[newUser] = {
-    newUser,
+  users[id] = {
+    id,
     email,
     password
   };
-  res.cookie('username', email);
+  res.cookie('id', id);
   res.redirect(`http://localhost:8080/urls`);
   }
 });
@@ -127,7 +158,8 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/login", (req, res) => { 
 
   if(checkingEmail(req.body.email) && bringPassword(req.body.email) === req.body.password ) {
-  res.cookie('username', req.body.id) //check sent cookies
+  let id = bringId(req.body.email);  
+  res.cookie('id', id)
   res.redirect(`http://localhost:8080/urls`)
   } else if (!checkingEmail(req.body.email)) {
     res.statusCode = 403;
@@ -141,7 +173,7 @@ app.post("/login", (req, res) => {
 
 // add logout functionality (cleaning cookies)
 app.post("/logout", (req, res) => { 
-  res.clearCookie('username');
+  res.clearCookie('id');
   res.redirect(`http://localhost:8080/urls`)
 });
 
@@ -167,7 +199,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //ro read the file urls_show.ejs
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
+  let user_id = req.cookies["id"];
+  let templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL],
+    user_id: req.cookies["id"],
+    email: bringEmail(user_id)
+    };
   res.render("urls_show", templateVars);
 });
 
