@@ -13,7 +13,7 @@ app.set("view engine", "ejs");
 //Start object
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ47lW" }
 };
 
 
@@ -85,29 +85,25 @@ function bringId(email) {
 
 // Returns array of short URLs for logged users (from urlDatabase)
 function urlsForUser(id) {
-  let arraySites = [];
-  for (const key in urlDatabase[key].userID) {
+  let urlData = {};
+  for (const key in urlDatabase) {
     if (urlDatabase[key].userID === id) {
-      arraySites.push(urlDatabase[key])
-    }
-  }
-  return arraySites;
-};
+      urlData[key] = { longURL: urlDatabase[key].longURL , userID: urlDatabase[key].userID }
+      }
+    };
+    return urlData;
+}
 
+//----------------------------------
 
-//------------------------------------------------------------------------------------------
 
 //ROUTERS
 
 //To read the file index.ejs
 app.get('/urls', (req, res) => {
   let user_id = req.cookies["id"];
-
-  // if (urlsForUser(arraySites)) {
-  // }
-
   let templateVars = { 
-    "urls": urlDatabase,
+    "urls": urlsForUser(user_id),
     email: bringEmail(user_id),
     user_id: req.cookies["id"]
     };
@@ -174,8 +170,12 @@ app.post("/register", (req, res) => {
 
 // To add an edit request (change the address of an already website and keep the previous key)
 app.post("/urls/:shortURL", (req, res) => {
+  let user_id = req.cookies["id"];
+  if (user_id) {
   urlDatabase[req.params.shortURL] = req.body
-  res.redirect(`http://localhost:8080/urls`)
+  res.redirect(`http://localhost:8080/urls`)} else {
+    process.exit; 
+  }
 });
 
 
@@ -187,6 +187,7 @@ app.post("/login", (req, res) => {
   let id = bringId(req.body.email);  
   res.cookie('id', id)
   res.redirect(`http://localhost:8080/urls`)
+
   } else if (!checkingEmail(req.body.email)) {
     res.statusCode = 403;
     res.send("Please, enter a valid email");
@@ -233,8 +234,13 @@ app.get("/u/:shortURL", (req, res) => {
 
 //add delete request
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL]
+  let user_id = req.cookies["id"];
+  if (user_id) {
+  delete urlDatabase[req.params.shortURL];
   res.redirect(`http://localhost:8080/urls`);
+  } else {
+    process.exit;
+  }
 });
 
 //ro read the file urls_show.ejs
