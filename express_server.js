@@ -31,6 +31,9 @@ const users = {
     password: "dishwasher-funk"
   }
 }
+//------------------------------------------------------------------------------------------
+
+// FUNCTIONS
 
 //Functionality to create random keys to the new urls links
 function generateRandomString() {
@@ -69,7 +72,6 @@ function bringEmail(id) {
   }
 };
 
-
 // Extract an id from an object with an email as an input
 function bringId(email) {
   let bringKey = "";
@@ -81,9 +83,29 @@ function bringId(email) {
   }
 };
 
+// Returns array of short URLs for logged users (from urlDatabase)
+function urlsForUser(id) {
+  let arraySites = [];
+  for (const key in urlDatabase[key].userID) {
+    if (urlDatabase[key].userID === id) {
+      arraySites.push(urlDatabase[key])
+    }
+  }
+  return arraySites;
+};
+
+
+//------------------------------------------------------------------------------------------
+
+//ROUTERS
+
 //To read the file index.ejs
 app.get('/urls', (req, res) => {
   let user_id = req.cookies["id"];
+
+  // if (urlsForUser(arraySites)) {
+  // }
+
   let templateVars = { 
     "urls": urlDatabase,
     email: bringEmail(user_id),
