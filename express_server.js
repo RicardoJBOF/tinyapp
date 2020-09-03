@@ -176,12 +176,14 @@ app.post("/register", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   let user_id = req.cookies["id"];
   if (user_id) {
-  urlDatabase[req.params.shortURL] = req.body
+    urlDatabase[req.params.shortURL] = {
+      longURL: req.body.longURL,
+      userID: user_id  
+    }
   res.redirect(`http://localhost:8080/urls`)} else {
     process.exit; 
   }
 });
-
 
 
 // add login functionality
