@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const  cookieParser = require('cookie-parser')
 app.use(cookieParser())
+const bcrypt = require('bcrypt');
 
 // add EJS
 app.set("view engine", "ejs");
@@ -31,6 +32,8 @@ const users = {
     password: "dishwasher-funk"
   }
 }
+
+
 //------------------------------------------------------------------------------------------
 
 // FUNCTIONS
@@ -157,10 +160,11 @@ app.post("/register", (req, res) => {
     res.send("Email already registered!");
 
   } else {
+  const hashedPassword = bcrypt.hashSync(password, 10);
   users[id] = {
     id,
     email,
-    password
+    password: hashedPassword
   };
   res.cookie('id', id);
   res.redirect(`http://localhost:8080/urls`);
@@ -182,8 +186,11 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // add login functionality
 app.post("/login", (req, res) => { 
+  const storedPassword = bringPassword(req.body.email);
+  const passedPassword = req.body.password ;
 
-  if(checkingEmail(req.body.email) && bringPassword(req.body.email) === req.body.password ) {
+  if(checkingEmail(req.body.email) && bcrypt.compareSync(passedPassword, storedPassword)
+  ) {
   let id = bringId(req.body.email);  
   res.cookie('id', id)
   res.redirect(`http://localhost:8080/urls`)
