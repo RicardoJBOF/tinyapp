@@ -25,7 +25,7 @@
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
-            <td><%= urls[url] %></td>
+            <td><%= Object.values(urls[url])[0] %></td>
 
             <!-- Added buttom to go to Edit Page-->
             <td><form method="GET" action='/urls/<%= url %>' >

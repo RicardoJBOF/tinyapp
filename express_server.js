@@ -12,14 +12,16 @@ app.set("view engine", "ejs");
 
 //Start object
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
+
+
 
 //Users object
 const users = { 
-  "123AbC": {
-    id: "123AbC", 
+  "aJ48lW": {
+    id: "aJ48lW", 
     email: "ricardo@example.com", 
     password: "purple-monkey-dinosaur"
   },
@@ -150,9 +152,11 @@ app.post("/register", (req, res) => {
 
 // To add an edit request (change the address of an already website and keep the previous key)
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.longURL
+  urlDatabase[req.params.shortURL] = req.body
   res.redirect(`http://localhost:8080/urls`)
 });
+
+
 
 // add login functionality
 app.post("/login", (req, res) => { 
@@ -184,7 +188,10 @@ app.post("/urls", (req, res) => {
   let user_id = req.cookies["id"];
   if (user_id) {
   let newKey = generateRandomString();
-  urlDatabase[newKey] = req.body.longURL;
+  urlDatabase[newKey] = {
+    longURL: req.body.longURL,
+    userID: user_id
+  }  
   res.redirect(`http://localhost:8080/urls/${newKey}`);
   } else {
     res.redirect(`http://localhost:8080/urls`)
@@ -194,9 +201,12 @@ app.post("/urls", (req, res) => {
 
 //send you back to the urls_index after delete a Url link
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+  const shortURL = req.params.shortURL;
+  const site= urlDatabase[shortURL].longURL
+  console.log(site);
+  res.redirect(site);
 });
+
 
 
 //add delete request
@@ -209,13 +219,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let user_id = req.cookies["id"];
   let templateVars = { 
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user_id: req.cookies["id"],
     email: bringEmail(user_id)
     };
   res.render("urls_show", templateVars);
 });
+
+
 
 // -----------------------------------------------------------------------------
 //TESTING CODE
