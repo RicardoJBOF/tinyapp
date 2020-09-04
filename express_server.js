@@ -4,8 +4,13 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-const  cookieParser = require('cookie-parser')
-app.use(cookieParser())
+const cookieSession = require('cookie-session')
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}))
+
+
 const bcrypt = require('bcrypt');
 
 // add EJS
@@ -104,11 +109,11 @@ function urlsForUser(id) {
 
 //To read the file index.ejs
 app.get('/urls', (req, res) => {
-  let user_id = req.cookies["id"];
+  let user_id = req.session.user_id;
   let templateVars = { 
     "urls": urlsForUser(user_id),
     email: bringEmail(user_id),
-    user_id: req.cookies["id"]
+    user_id: req.session.user_id
     };
   res.render("urls_index", templateVars);
 });
@@ -116,10 +121,10 @@ app.get('/urls', (req, res) => {
 
 //to read the file urls_new.ejs
 app.get("/urls/new", (req, res) => {
-  let user_id = req.cookies["id"];
+  let user_id = req.session.user_id;
   let templateVars = {
     email: bringEmail(user_id),
-    user_id: req.cookies["id"]
+    user_id: req.session.user_id
   };
   res.render("urls_new", templateVars);
 });
@@ -127,9 +132,9 @@ app.get("/urls/new", (req, res) => {
 
 //to read the file login
 app.get("/login", (req, res) => {
-  let user_id = req.cookies["id"];
+  let user_id = req.session.user_id;
   let templateVars = {
-    user_id: req.cookies["id"],
+    user_id: req.session.user_id,
     email: bringEmail(user_id)
   };
   res.render("login", templateVars);
@@ -138,9 +143,9 @@ app.get("/login", (req, res) => {
 
 //To read the file register.ejs
 app.get("/register", (req, res) => {
-  let user_id = req.cookies["id"];
+  let user_id = req.session.user_id;
   let templateVars = {
-    user_id: req.cookies["id"],
+    user_id: req.session.user_id,
     email: bringEmail(user_id)
   };
   res.render("register", templateVars);
@@ -166,7 +171,7 @@ app.post("/register", (req, res) => {
     email,
     password: hashedPassword
   };
-  res.cookie('id', id);
+  req.session.user_id = "user_id";
   res.redirect(`http://localhost:8080/urls`);
   }
 });
@@ -174,7 +179,7 @@ app.post("/register", (req, res) => {
 
 // To add an edit request (change the address of an already website and keep the previous key)
 app.post("/urls/:shortURL", (req, res) => {
-  let user_id = req.cookies["id"];
+  let user_id = req.session.user_id;
   if (user_id) {
     urlDatabase[req.params.shortURL] = {
       longURL: req.body.longURL,
@@ -194,7 +199,7 @@ app.post("/login", (req, res) => {
   if(checkingEmail(req.body.email) && bcrypt.compareSync(passedPassword, storedPassword)
   ) {
   let id = bringId(req.body.email);  
-  res.cookie('id', id)
+  req.session.user_id = "user_id"
   res.redirect(`http://localhost:8080/urls`)
 
   } else if (!checkingEmail(req.body.email)) {
@@ -209,7 +214,7 @@ app.post("/login", (req, res) => {
 
 // add logout functionality (cleaning cookies)
 app.post("/logout", (req, res) => { 
-  res.clearCookie('id');
+  req.session = null;
   res.redirect(`http://localhost:8080/urls`)
 });
 
@@ -217,7 +222,7 @@ app.post("/logout", (req, res) => {
 
 //create a new Url
 app.post("/urls", (req, res) => {
-  let user_id = req.cookies["id"];
+  let user_id = req.session.user_id;
   if (user_id) {
   let newKey = generateRandomString();
   urlDatabase[newKey] = {
@@ -243,7 +248,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 //add delete request
 app.post("/urls/:shortURL/delete", (req, res) => {
-  let user_id = req.cookies["id"];
+  let user_id = req.session.user_id;
   if (user_id) {
   delete urlDatabase[req.params.shortURL];
   res.redirect(`http://localhost:8080/urls`);
@@ -254,11 +259,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //ro read the file urls_show.ejs
 app.get("/urls/:shortURL", (req, res) => {
-  let user_id = req.cookies["id"];
+  let user_id = req.session.user_id;
   let templateVars = { 
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-    user_id: req.cookies["id"],
+    user_id: req.session.user_id,
     email: bringEmail(user_id)
     };
   res.render("urls_show", templateVars);
