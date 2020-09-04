@@ -50,53 +50,47 @@ function generateRandomString() {
 }
 
 //Function to check if the email already exist
-function checkingEmail(email) {
-  for (const key in users) {
-    if(users[key].email === email)
+function checkingEmail(email, database) {
+  for (const key in database) {
+    if(database[key].email === email)
     return true;
   } 
   return false ;
 }
 
 // Extract a password from an object with an email as an input
-function bringPassword(email) {
-  let bringKey = "";
-  for(const key in users) {
-    if (users[key].email === email) {
-      bringKey = key;
-      return users[key].password;
+function bringPassword(email, database) {
+  for(const key in database) {
+    if (database[key].email === email) {
+      return database[key].password;
     }
   }
 };
 
 // Extract an email from an object with an id as an input
-function bringEmail(id) {
-  let bringKey = "";
-  for(const key in users) {
-    if (users[key].id === id) {
-      bringKey = key;
-      return users[key].email;
+function bringEmail(id, database) {
+  for(const key in database) {
+    if (database[key].id === id) {
+      return database[key].email;
     }
   }
 };
 
 // Extract an id from an object with an email as an input
-function bringId(email) {
-  let bringKey = "";
-  for(const key in users) {
-    if (users[key].email === email) {
-      bringKey = key;
-      return users[key].id;
+function getUserByEmail(email, database) {
+  for(const key in database) {
+    if (database[key].email === email) {
+      return database[key].id;
     }
   }
 };
 
 // Returns array of short URLs for logged users (from urlDatabase)
-function urlsForUser(id) {
+function urlsForUser(id, database) {
   let urlData = {};
-  for (const key in urlDatabase) {
-    if (urlDatabase[key].userID === id) {
-      urlData[key] = { longURL: urlDatabase[key].longURL , userID: urlDatabase[key].userID }
+  for (const key in database) {
+    if (database[key].userID === id) {
+      urlData[key] = { longURL: database[key].longURL , userID: database[key].userID }
       }
     };
     return urlData;
@@ -111,19 +105,21 @@ function urlsForUser(id) {
 app.get('/urls', (req, res) => {
   let user_id = req.session.user_id;
   let templateVars = { 
-    "urls": urlsForUser(user_id),
-    email: bringEmail(user_id),
+    "urls": urlsForUser(user_id, urlDatabase),
+    email: bringEmail(user_id, users),
     user_id: req.session.user_id
     };
   res.render("urls_index", templateVars);
 });
 
 
+
+
 //to read the file urls_new.ejs
 app.get("/urls/new", (req, res) => {
   let user_id = req.session.user_id;
   let templateVars = {
-    email: bringEmail(user_id),
+    email: bringEmail(user_id, users),
     user_id: req.session.user_id
   };
   res.render("urls_new", templateVars);
@@ -135,7 +131,7 @@ app.get("/login", (req, res) => {
   let user_id = req.session.user_id;
   let templateVars = {
     user_id: req.session.user_id,
-    email: bringEmail(user_id)
+    email: null
   };
   res.render("login", templateVars);
 });
@@ -146,7 +142,7 @@ app.get("/register", (req, res) => {
   let user_id = req.session.user_id;
   let templateVars = {
     user_id: req.session.user_id,
-    email: bringEmail(user_id)
+    email: null
   };
   res.render("register", templateVars);
 });
@@ -160,7 +156,7 @@ app.post("/register", (req, res) => {
     res.statusCode = 400;
     res.send("Please, enter valid email and/or password!")
 
-  } else if (checkingEmail(email)) {
+  } else if (checkingEmail(email, users)) {
     res.statusCode = 400;
     res.send("Email already registered!");
 
@@ -171,8 +167,8 @@ app.post("/register", (req, res) => {
     email,
     password: hashedPassword
   };
-  req.session.user_id = "user_id";
-  res.redirect(`http://localhost:8080/urls`);
+  req.session.user_id = id;
+  res.redirect(`/urls`);
   }
 });
 
@@ -193,19 +189,19 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // add login functionality
 app.post("/login", (req, res) => { 
-  const storedPassword = bringPassword(req.body.email);
+  const storedPassword = bringPassword(req.body.email, users);
   const passedPassword = req.body.password ;
 
-  if(checkingEmail(req.body.email) && bcrypt.compareSync(passedPassword, storedPassword)
+  if(checkingEmail(req.body.email, users) && bcrypt.compareSync(passedPassword, storedPassword)
   ) {
-  let id = bringId(req.body.email);  
-  req.session.user_id = "user_id"
+  let user_id = getUserByEmail(req.body.email, users);  
+  req.session.user_id = user_id;
   res.redirect(`http://localhost:8080/urls`)
 
-  } else if (!checkingEmail(req.body.email)) {
+  } else if (!checkingEmail(req.body.email, users)) {
     res.statusCode = 403;
     res.send("Please, enter a valid email");
-  } else if (bringPassword(req.body.email) !== req.body.password) {
+  } else if (bringPassword(req.body.email, users) !== req.body.password) {
     res.statusCode = 403;
     res.send("Password does not match");
   }
@@ -240,7 +236,6 @@ app.post("/urls", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const site= urlDatabase[shortURL].longURL
-  console.log(site);
   res.redirect(site);
 });
 
@@ -264,7 +259,7 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
     user_id: req.session.user_id,
-    email: bringEmail(user_id)
+    email: bringEmail(user_id, users)
     };
   res.render("urls_show", templateVars);
 });
