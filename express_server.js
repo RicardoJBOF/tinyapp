@@ -172,7 +172,7 @@ app.post("/urls/:shortURL", (req, res) => {
       longURL: req.body.longURL,
       userID: user_id,
     };
-    res.redirect(`http://localhost:8080/urls`);
+    res.redirect(`/urls`);
   } else {
     process.exit;
   }
@@ -187,7 +187,7 @@ app.post("/login", (req, res) => {
   ) {
     let user_id = getUserByEmail(req.body.email, users);
     req.session.user_id = user_id;
-    res.redirect(`http://localhost:8080/urls`);
+    res.redirect(`/urls`);
   } else if (!checkingEmail(req.body.email, users)) {
     res.statusCode = 403;
     res.send("Please, enter a valid email");
@@ -199,7 +199,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect(`http://localhost:8080/urls`);
+  res.redirect(`/urls`);
 });
 
 app.post("/urls", (req, res) => {
@@ -210,9 +210,9 @@ app.post("/urls", (req, res) => {
       longURL: req.body.longURL,
       userID: user_id,
     };
-    res.redirect(`http://localhost:8080/urls/${newKey}`);
+    res.redirect(`/urls/${newKey}`);
   } else {
-    res.redirect(`http://localhost:8080/urls`);
+    res.redirect(`/urls`);
   }
 });
 
@@ -220,7 +220,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   const user_id = req.session.user_id;
   if (user_id) {
     delete urlDatabase[req.params.shortURL];
-    res.redirect(`http://localhost:8080/urls`);
+    res.redirect(`/urls`);
   } else {
     process.exit;
   }
