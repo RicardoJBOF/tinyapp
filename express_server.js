@@ -122,7 +122,6 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 //POST ROUTERS
-
 app.post("/register", (req, res) => {
   const id = generateRandomString();
   const { email, password } = req.body;

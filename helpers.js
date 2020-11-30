@@ -56,7 +56,6 @@ function urlsForUser(id, database) {
   return urlData;
 }
 
-
 module.exports = {
   generateRandomString,
   checkingEmail,
