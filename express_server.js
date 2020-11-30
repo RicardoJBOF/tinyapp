@@ -1,6 +1,10 @@
+//USING EXPRESS
 const express = require("express");
 const app = express();
 const PORT = 8080;
+
+// USING EJS
+app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
 app.use(
@@ -19,10 +23,9 @@ app.use(
 //add cript
 const bcrypt = require("bcrypt");
 
-// add EJS
-app.set("view engine", "ejs");
 
-// Import helpers function
+
+// IMPORT HELPERS FUNCTIONS
 const {
   generateRandomString,
   checkingEmail,
@@ -33,7 +36,7 @@ const {
 } = require("./helpers");
 
 
-//Start object
+// DATABASE OBJECT
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -45,7 +48,7 @@ const urlDatabase = {
   },
 };
 
-//Users object
+//USERS OBJECT
 const users = {
   aJ48lW: {
     id: "aJ48lW",
@@ -59,10 +62,8 @@ const users = {
   },
 };
 
-//ROUTERS
-//------------------------------------------------------------
 
-//GET -----------------------
+//GET ROUTERS
 
 //To read route
 app.get("/", (req, res) => {
