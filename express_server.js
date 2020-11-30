@@ -24,6 +24,8 @@ app.use(
 //add cript
 const bcrypt = require("bcrypt");
 
+const request = require('request');
+
 
 
 // IMPORT HELPERS FUNCTIONS
@@ -80,29 +82,13 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  let user_id = req.session.user_id;
   let templateVars = {
     urls: urlsForUser(user_id, urlDatabase),
     email: bringEmail(user_id, users),
     user_id: req.session.user_id,
   };
   res.render("urls_index", templateVars);
-});
-
-app.get("/urls/:shortURL", (req, res) => {
-  let user_id = req.session.user_id;
-  if (user_id === urlDatabase[req.params.shortURL].userID) {
-    let templateVars = {
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL].longURL,
-      user_id: req.session.user_id,
-      email: bringEmail(user_id, users),
-    };
-    res.render("urls_show", templateVars);
-  } else if (user_id) {
-    res.send("Access denied!");
-  } else {
-    res.redirect("/login");
-  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -118,9 +104,48 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+app.get("/urls/:shortURL", (req, res) => {
+  // let user_id = req.session.user_id;
+  // if (user_id === urlDatabase[req.params.shortURL].userID) {
+  //   let templateVars = {
+  //     shortURL: req.params.shortURL,
+  //     longURL: urlDatabase[req.params.shortURL].longURL,
+  //     user_id: req.session.user_id,
+  //     email: bringEmail(user_id, users),
+  //   };
+  //   res.render("urls_show", templateVars);
+  // } else if (user_id) {
+  //   res.send("Access denied!");
+  // } else {
+  //   res.redirect("/login");
+  // }
+
+  const user_id = req.session.user_id;;
+  const urls = urlsForUser(user_id, urlDatabase);
+  const longURL = urlDatabase[req.params.shortURL] ? urlDatabase[req.params.shortURL].longURL : "";
+  let error;
+  request(longURL, (e, response, body) => {
+    if (e) {
+      error = e;
+    }
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL,
+      user_id,
+      urls,
+      email: bringEmail(user_id, users),
+      error
+    };
+    res.render("urls_show", templateVars);
+  })
+
+
+});
+
+
+
 //to read the file login
 app.get("/login", (req, res) => {
-  //let user_id = req.session.user_id;
   let templateVars = {
     user_id: req.session.user_id,
     email: null,
@@ -130,7 +155,6 @@ app.get("/login", (req, res) => {
 
 //To read the file register.ejs
 app.get("/register", (req, res) => {
-  let user_id = req.session.user_id;
   let templateVars = {
     user_id: req.session.user_id,
     email: null,
