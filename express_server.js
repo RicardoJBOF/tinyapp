@@ -64,8 +64,6 @@ const users = {
 
 
 //GET ROUTERS
-
-//To read route
 app.get("/", (req, res) => {
   let user_id = req.session.user_id;
   if (user_id) {
@@ -80,7 +78,6 @@ app.get("/", (req, res) => {
   }
 });
 
-//To read the file index.ejs
 app.get("/urls", (req, res) => {
   let user_id = req.session.user_id;
   let templateVars = {
