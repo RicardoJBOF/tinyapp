@@ -1,80 +1,77 @@
-// libraries
-//--------------------------------------------------------------------
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
+
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
-const cookieSession = require('cookie-session')
-app.use(cookieSession({
-  name: 'session',
-  keys: ['key1', 'key2']
-}))
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
+const cookieSession = require("cookie-session");
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["key1", "key2"],
+  })
+);
 
 //add cript
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
 // add EJS
 app.set("view engine", "ejs");
 
-// helpers function
-//--------------------------------------------------------------------
+// Import helpers function
 const {
   generateRandomString,
   checkingEmail,
   bringPassword,
   bringEmail,
   getUserByEmail,
-  urlsForUser
-} = require('./helpers')
+  urlsForUser,
+} = require("./helpers");
 
-
-// Objects
-//--------------------------------------------------------------------
 
 //Start object
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW"
+    userID: "aJ48lW",
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "aJ47lW"
-  }
+    userID: "aJ47lW",
+  },
 };
 
 //Users object
 const users = {
-  "aJ48lW": {
+  aJ48lW: {
     id: "aJ48lW",
     email: "ricardo@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "purple-monkey-dinosaur",
   },
   "456DeF": {
     id: "u456DeF",
     email: "barbosa@example.com",
-    password: "dishwasher-funk"
-  }
-}
-
-
+    password: "dishwasher-funk",
+  },
+};
 
 //ROUTERS
 //------------------------------------------------------------
 
-//GET ------------------------
+//GET -----------------------
 
 //To read route
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   let user_id = req.session.user_id;
   if (user_id) {
     let templateVars = {
-      "urls": urlsForUser(user_id, urlDatabase),
+      urls: urlsForUser(user_id, urlDatabase),
       email: bringEmail(user_id, users),
-      user_id: req.session.user_id
+      user_id: req.session.user_id,
     };
     res.render("urls_index", templateVars);
   } else {
@@ -83,12 +80,12 @@ app.get('/', (req, res) => {
 });
 
 //To read the file index.ejs
-app.get('/urls', (req, res) => {
+app.get("/urls", (req, res) => {
   let user_id = req.session.user_id;
   let templateVars = {
-    "urls": urlsForUser(user_id, urlDatabase),
+    urls: urlsForUser(user_id, urlDatabase),
     email: bringEmail(user_id, users),
-    user_id: req.session.user_id
+    user_id: req.session.user_id,
   };
   res.render("urls_index", templateVars);
 });
@@ -99,7 +96,7 @@ app.get("/urls/new", (req, res) => {
   if (user_id) {
     let templateVars = {
       email: bringEmail(user_id, users),
-      user_id: req.session.user_id
+      user_id: req.session.user_id,
     };
     res.render("urls_new", templateVars);
   } else {
@@ -112,7 +109,7 @@ app.get("/login", (req, res) => {
   //let user_id = req.session.user_id;
   let templateVars = {
     user_id: req.session.user_id,
-    email: null
+    email: null,
   };
   res.render("login", templateVars);
 });
@@ -122,7 +119,7 @@ app.get("/register", (req, res) => {
   let user_id = req.session.user_id;
   let templateVars = {
     user_id: req.session.user_id,
-    email: null
+    email: null,
   };
   res.render("register", templateVars);
 });
@@ -130,7 +127,7 @@ app.get("/register", (req, res) => {
 //send you back to the urls_index after delete a Url link
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const site = urlDatabase[shortURL].longURL
+  const site = urlDatabase[shortURL].longURL;
   res.redirect(site);
 });
 
@@ -142,7 +139,7 @@ app.get("/urls/:shortURL", (req, res) => {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL].longURL,
       user_id: req.session.user_id,
-      email: bringEmail(user_id, users)
+      email: bringEmail(user_id, users),
     };
     res.render("urls_show", templateVars);
   } else if (user_id) {
@@ -156,14 +153,11 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //To add new users
 app.post("/register", (req, res) => {
-  let id = generateRandomString()
-  const {
-    email,
-    password
-  } = req.body;
-  if (email === '' || password === '') {
+  let id = generateRandomString();
+  const { email, password } = req.body;
+  if (email === "" || password === "") {
     res.statusCode = 400;
-    res.send("Please, enter valid email and/or password!")
+    res.send("Please, enter valid email and/or password!");
   } else if (checkingEmail(email, users)) {
     res.statusCode = 400;
     res.send("Email already registered!");
@@ -172,7 +166,7 @@ app.post("/register", (req, res) => {
     users[id] = {
       id,
       email,
-      password: hashedPassword
+      password: hashedPassword,
     };
     req.session.user_id = id;
     res.redirect(`/urls`);
@@ -185,9 +179,9 @@ app.post("/urls/:shortURL", (req, res) => {
   if (user_id) {
     urlDatabase[req.params.shortURL] = {
       longURL: req.body.longURL,
-      userID: user_id
-    }
-    res.redirect(`http://localhost:8080/urls`)
+      userID: user_id,
+    };
+    res.redirect(`http://localhost:8080/urls`);
   } else {
     process.exit;
   }
@@ -197,10 +191,13 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/login", (req, res) => {
   const storedPassword = bringPassword(req.body.email, users);
   const passedPassword = req.body.password;
-  if (checkingEmail(req.body.email, users) && bcrypt.compareSync(passedPassword, storedPassword)) {
+  if (
+    checkingEmail(req.body.email, users) &&
+    bcrypt.compareSync(passedPassword, storedPassword)
+  ) {
     let user_id = getUserByEmail(req.body.email, users);
     req.session.user_id = user_id;
-    res.redirect(`http://localhost:8080/urls`)
+    res.redirect(`http://localhost:8080/urls`);
   } else if (!checkingEmail(req.body.email, users)) {
     res.statusCode = 403;
     res.send("Please, enter a valid email");
@@ -213,7 +210,7 @@ app.post("/login", (req, res) => {
 // add logout functionality (cleaning cookies)
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect(`http://localhost:8080/urls`)
+  res.redirect(`http://localhost:8080/urls`);
 });
 
 //create a new Url
@@ -223,11 +220,11 @@ app.post("/urls", (req, res) => {
     let newKey = generateRandomString();
     urlDatabase[newKey] = {
       longURL: req.body.longURL,
-      userID: user_id
-    }
+      userID: user_id,
+    };
     res.redirect(`http://localhost:8080/urls/${newKey}`);
   } else {
-    res.redirect(`http://localhost:8080/urls`)
+    res.redirect(`http://localhost:8080/urls`);
   }
 });
 
@@ -242,33 +239,29 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
-
-
-// -----------------------------------------------------------------------------
-//TESTING CODE
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
-});
-
-app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
-});
-//-------------------------------------------------------------------
-
-//Send message that the server is working
+//SERVER LISTENING MESSAGE
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+//TESTING CODE
+// app.get("/", (req, res) => {
+//   res.send("Hello!");
+// });
+
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
+
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
+
+// app.get("/set", (req, res) => {
+//   const a = 1;
+//   res.send(`a = ${a}`);
+// });
+
+// app.get("/fetch", (req, res) => {
+//   res.send(`a = ${a}`);
+// });
