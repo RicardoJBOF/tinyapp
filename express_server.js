@@ -6,14 +6,16 @@ const PORT = 8080;
 // USING EJS
 app.set("view engine", "ejs");
 
+//USING BODYPARSER
 const bodyParser = require("body-parser");
 app.use(
   bodyParser.urlencoded({
     extended: true,
   })
 );
-const cookieSession = require("cookie-session");
 
+//USING FOR LOGIN
+const cookieSession = require("cookie-session");
 app.use(
   cookieSession({
     name: "session",
@@ -21,12 +23,11 @@ app.use(
   })
 );
 
-//add cript
+//USING FOR CRYPTOGRAPHING
 const bcrypt = require("bcrypt");
 
+//USING FOR REQUEST
 const request = require('request');
-
-
 
 // IMPORT HELPERS FUNCTIONS
 const {
@@ -37,7 +38,6 @@ const {
   getUserByEmail,
   urlsForUser,
 } = require("./helpers");
-
 
 // DATABASE OBJECT
 const urlDatabase = {
@@ -68,22 +68,17 @@ const users = {
 
 //GET ROUTERS
 app.get("/", (req, res) => {
-  let user_id = req.session.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
-    let templateVars = {
-      urls: urlsForUser(user_id, urlDatabase),
-      email: bringEmail(user_id, users),
-      user_id: req.session.user_id,
-    };
-    res.render("urls_index", templateVars);
+    return res.redirect('urls');
   } else {
     res.redirect("login");
   }
 });
 
 app.get("/urls", (req, res) => {
-  let user_id = req.session.user_id;
-  let templateVars = {
+  const user_id = req.session.user_id;
+  const templateVars = {
     urls: urlsForUser(user_id, urlDatabase),
     email: bringEmail(user_id, users),
     user_id: req.session.user_id,
@@ -92,9 +87,9 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let user_id = req.session.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
-    let templateVars = {
+    const templateVars = {
       email: bringEmail(user_id, users),
       user_id: req.session.user_id,
     };
@@ -105,21 +100,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  // let user_id = req.session.user_id;
-  // if (user_id === urlDatabase[req.params.shortURL].userID) {
-  //   let templateVars = {
-  //     shortURL: req.params.shortURL,
-  //     longURL: urlDatabase[req.params.shortURL].longURL,
-  //     user_id: req.session.user_id,
-  //     email: bringEmail(user_id, users),
-  //   };
-  //   res.render("urls_show", templateVars);
-  // } else if (user_id) {
-  //   res.send("Access denied!");
-  // } else {
-  //   res.redirect("/login");
-  // }
-
   const user_id = req.session.user_id;;
   const urls = urlsForUser(user_id, urlDatabase);
   const longURL = urlDatabase[req.params.shortURL] ? urlDatabase[req.params.shortURL].longURL : "";
@@ -138,44 +118,34 @@ app.get("/urls/:shortURL", (req, res) => {
     };
     res.render("urls_show", templateVars);
   })
-
-
 });
 
-
-
-//to read the file login
 app.get("/login", (req, res) => {
-  let templateVars = {
+  const templateVars = {
     user_id: req.session.user_id,
     email: null,
   };
   res.render("login", templateVars);
 });
 
-//To read the file register.ejs
 app.get("/register", (req, res) => {
-  let templateVars = {
+  const templateVars = {
     user_id: req.session.user_id,
     email: null,
   };
   res.render("register", templateVars);
 });
 
-//send you back to the urls_index after delete a Url link
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const site = urlDatabase[shortURL].longURL;
   res.redirect(site);
 });
 
-
-
 //POST ROUTERS
 
-//To add new users
 app.post("/register", (req, res) => {
-  let id = generateRandomString();
+  const id = generateRandomString();
   const { email, password } = req.body;
   if (email === "" || password === "") {
     res.statusCode = 400;
@@ -195,9 +165,8 @@ app.post("/register", (req, res) => {
   }
 });
 
-// To add an edit request (change the address of an already website and keep the previous key)
 app.post("/urls/:shortURL", (req, res) => {
-  let user_id = req.session.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
     urlDatabase[req.params.shortURL] = {
       longURL: req.body.longURL,
@@ -209,7 +178,6 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
-// add login functionality
 app.post("/login", (req, res) => {
   const storedPassword = bringPassword(req.body.email, users);
   const passedPassword = req.body.password;
@@ -229,15 +197,13 @@ app.post("/login", (req, res) => {
   }
 });
 
-// add logout functionality (cleaning cookies)
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect(`http://localhost:8080/urls`);
 });
 
-//create a new Url
 app.post("/urls", (req, res) => {
-  let user_id = req.session.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
     let newKey = generateRandomString();
     urlDatabase[newKey] = {
@@ -250,9 +216,8 @@ app.post("/urls", (req, res) => {
   }
 });
 
-//add delete request
 app.post("/urls/:shortURL/delete", (req, res) => {
-  let user_id = req.session.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
     delete urlDatabase[req.params.shortURL];
     res.redirect(`http://localhost:8080/urls`);
