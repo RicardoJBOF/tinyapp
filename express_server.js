@@ -13,6 +13,7 @@ app.use(
   })
 );
 const cookieSession = require("cookie-session");
+
 app.use(
   cookieSession({
     name: "session",
@@ -79,7 +80,6 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let user_id = req.session.user_id;
   let templateVars = {
     urls: urlsForUser(user_id, urlDatabase),
     email: bringEmail(user_id, users),
@@ -88,7 +88,23 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//to read the file urls_new.ejs
+app.get("/urls/:shortURL", (req, res) => {
+  let user_id = req.session.user_id;
+  if (user_id === urlDatabase[req.params.shortURL].userID) {
+    let templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      user_id: req.session.user_id,
+      email: bringEmail(user_id, users),
+    };
+    res.render("urls_show", templateVars);
+  } else if (user_id) {
+    res.send("Access denied!");
+  } else {
+    res.redirect("/login");
+  }
+});
+
 app.get("/urls/new", (req, res) => {
   let user_id = req.session.user_id;
   if (user_id) {
@@ -129,25 +145,9 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(site);
 });
 
-//ro read the file urls_show.ejs /urls/:id
-app.get("/urls/:shortURL", (req, res) => {
-  let user_id = req.session.user_id;
-  if (user_id === urlDatabase[req.params.shortURL].userID) {
-    let templateVars = {
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL].longURL,
-      user_id: req.session.user_id,
-      email: bringEmail(user_id, users),
-    };
-    res.render("urls_show", templateVars);
-  } else if (user_id) {
-    res.send("Access denied!");
-  } else {
-    res.redirect("/login");
-  }
-});
 
-//POST ------------------------
+
+//POST ROUTERS
 
 //To add new users
 app.post("/register", (req, res) => {
