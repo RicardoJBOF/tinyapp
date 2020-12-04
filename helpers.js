@@ -15,15 +15,6 @@ function checkingEmail(email, database) {
   return false;
 }
 
-// Extract a password from an object with an email as an input
-function bringPassword(email, database) {
-  for (const key in database) {
-    if (database[key].email === email) {
-      return database[key].password;
-    }
-  }
-};
-
 // Extract an email from an object with an id as an input
 function bringEmail(id, database) {
   for (const key in database) {
@@ -59,7 +50,6 @@ function urlsForUser(id, database) {
 module.exports = {
   generateRandomString,
   checkingEmail,
-  bringPassword,
   bringEmail,
   getUserByEmail,
   urlsForUser

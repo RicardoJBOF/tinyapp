@@ -19,7 +19,7 @@ const cookieSession = require("cookie-session");
 app.use(
   cookieSession({
     name: "session",
-    keys: ["JNT&vY@ioQDHtcEXreRHx@gz", "ZFJxcnJsYU5ZcmZEVk1JMlU4WDVYZz09"],
+    keys: ["JNT&vY@io!QDHtcEXreR?Hx@gz", "ZFJxcn&JsYU5ZcmZEVk1JMl*U4WDVYZz09"],
   })
 );
 
@@ -33,7 +33,6 @@ const request = require('request');
 const {
   generateRandomString,
   checkingEmail,
-  bringPassword,
   bringEmail,
   getUserByEmail,
   urlsForUser,
@@ -157,7 +156,7 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const storedPassword = bringPassword(req.body.email, users);
+  const storedPassword = users[getUserByEmail(req.body.email, users)].password;
   const passedPassword = req.body.password;
   if (
     checkingEmail(req.body.email, users) &&
@@ -169,7 +168,7 @@ app.post("/login", (req, res) => {
   } else if (!checkingEmail(req.body.email, users)) {
     res.statusCode = 403;
     res.send("Please, enter a valid email");
-  } else if (bringPassword(req.body.email, users) !== req.body.password) {
+  } else if (storedPassword !== req.body.password) {
     res.statusCode = 403;
     res.send("Password does not match");
   }
