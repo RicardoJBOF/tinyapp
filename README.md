@@ -59,8 +59,8 @@ TinyApp is a full stack web application built with Node and Express that allows 
   - if URL for the given ID does not exist, returns HTML with a relevant error message
 
 - /login
-  -if user is logged in, redirects to /urls
-  -if user is not logged in returns HTML with a form ( input fields for email and password plus submit butto that makes a POST request to /login)
+  - if user is logged in, redirects to /urls
+  - if user is not logged in returns HTML with a form ( input fields for email and password plus submit butto that makes a POST request to /login)
 
 - /register
   - if user is logged in, redirects to /urls
