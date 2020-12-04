@@ -168,7 +168,7 @@ app.post("/login", (req, res) => {
   } else if (!checkingEmail(req.body.email, users)) {
     res.statusCode = 403;
     res.send("Please, enter a valid email");
-  } else if (storedPassword !== req.body.password) {
+  } else {
     res.statusCode = 403;
     res.send("Password does not match");
   }
