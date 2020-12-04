@@ -19,7 +19,7 @@ const cookieSession = require("cookie-session");
 app.use(
   cookieSession({
     name: "session",
-    keys: ["key1", "key2"],
+    keys: ["JNT&vY@ioQDHtcEXreRHx@gz", "ZFJxcnJsYU5ZcmZEVk1JMlU4WDVYZz09"],
   })
 );
 
