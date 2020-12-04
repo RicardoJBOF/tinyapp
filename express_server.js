@@ -29,6 +29,10 @@ const bcrypt = require("bcrypt");
 //USING FOR REQUEST
 const request = require('request');
 
+//USING METHOD OVERRIDE
+const methodOverride = require('method-override')
+app.use(methodOverride('X-HTTP-Method-Override'))
+
 // IMPORT HELPERS FUNCTIONS
 const {
   generateRandomString,
