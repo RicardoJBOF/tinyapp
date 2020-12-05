@@ -31,7 +31,7 @@ const request = require('request');
 
 //USING METHOD OVERRIDE
 const methodOverride = require('method-override')
-app.use(methodOverride('X-HTTP-Method-Override'))
+app.use(methodOverride('_method'))
 
 // IMPORT HELPERS FUNCTIONS
 const {
@@ -146,19 +146,6 @@ app.post("/register", (req, res) => {
   }
 });
 
-app.post("/urls/:shortURL", (req, res) => {
-  const user_id = req.session.user_id;
-  if (user_id) {
-    urlDatabase[req.params.shortURL] = {
-      longURL: req.body.longURL,
-      userID: user_id,
-    };
-    res.redirect(`/urls`);
-  } else {
-    process.exit;
-  }
-});
-
 app.post("/login", (req, res) => {
   const storedPassword = users[getUserByEmail(req.body.email, users)].password;
   const passedPassword = req.body.password;
@@ -197,7 +184,22 @@ app.post("/urls", (req, res) => {
   }
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
+//PUT ROUTERS
+app.put("/urls/:shortURL", (req, res) => {
+  const user_id = req.session.user_id;
+  if (user_id) {
+    urlDatabase[req.params.shortURL] = {
+      longURL: req.body.longURL,
+      userID: user_id,
+    };
+    res.redirect(`/urls`);
+  } else {
+    process.exit;
+  }
+});
+
+//DELETE ROUTERS
+app.delete("/urls/:shortURL", (req, res) => {
   const user_id = req.session.user_id;
   if (user_id) {
     delete urlDatabase[req.params.shortURL];
